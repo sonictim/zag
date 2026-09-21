@@ -53,7 +53,10 @@ pub fn lines(s: []const u8) std.mem.SplitIterator([]const u8) {
 pub fn parse(comptime T: type, s: []const u8) !T {
     return switch (@TypeOf(T)) {
         .float => try std.fmt.parseFloat(T, s),
-        .int => try std.fmt.parseInt(T, s, 10),
+        .int => |info| switch (info.signedness) {
+            .signed => try std.fmt.parseInt(T, s, 10),
+            .unsigned => try std.fmt.parseUnsigned(T, s, 10),
+        },
         else => std.fmt.ParseIntError.InvalidCharacter,
     };
 }
