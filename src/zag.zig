@@ -6,7 +6,12 @@ pub const json = @import("json.zig");
 pub const as = @import("cast.zig");
 pub const io = std.Io;
 pub const alloc = std.mem.Allocator;
-pub const eql = std.mem.eql;
+pub const mem = std.mem;
+pub const time = std.time;
+pub const atomic = std.atomic;
+pub const http = std.http;
+pub const fmt = std.fmt;
+
 // pub const text = @import("text.zig").Text;
 
 pub const str = []const u8;
@@ -38,5 +43,17 @@ pub fn map(comptime K: type, comptime V: type) std.AutoHashMapUnmanaged(K, V) {
 }
 
 pub fn eq(s1: []const u8, s2: []const u8) bool {
-    return eql(u8, s1, s2);
+    return std.mem.eql(u8, s1, s2);
+}
+
+pub fn lines(s: []const u8) std.mem.SplitIterator([]const u8) {
+    return std.mem.splitScalar([]const u8, s, '\n');
+}
+
+pub fn parse(comptime T: type, s: []const u8) !T {
+    return switch (@TypeOf(T)) {
+        .float => try std.fmt.parseFloat(T, s),
+        .int => try std.fmt.parseInt(T, s, 10),
+        else => std.fmt.ParseIntError.InvalidCharacter,
+    };
 }
